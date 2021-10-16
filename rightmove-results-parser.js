@@ -10,11 +10,10 @@ const PropertyService = require('./property-service');
 const utils = require('./utils');
 
 class RightmoveResultsParser {
-    constructor({ mode, startingUrl, maxDepth, searchId }) {
+    constructor({ startingUrl, maxDepth, searchId }) {
     	console.log('----------------------------')
     	console.log('Configuration');
     	console.log('----------------------------')
-    	console.log(`Mode: ${mode}`);
     	console.log(`Starting URL: ${startingUrl}`);
     	console.log(`Max depth: ${maxDepth}`);
     	console.log('\n')
@@ -25,7 +24,6 @@ class RightmoveResultsParser {
         this.page = null;
         this.maxDepth = maxDepth;
         this.currentDepth = 0;
-        this.mode = mode;
         this.searchId = searchId;
     }
 
