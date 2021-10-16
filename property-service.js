@@ -1,63 +1,96 @@
 /**
- * This kinda sucks because it creates a connection inside each method, we should use
- * a connection pool or something.
+ * Things that are bad with this...
+ * - No referential integrity (because I CBA to deal with dropping/creating tables in specific order)
+ * - Loads of db code in here, ideally they'd be abstracted out into a DAO
+ * - No separation of concerns, lots of unrelated crap in here.
  */
 
 const db = require('./db');
 
 class PropertyService {
-	constructor() {
-		this.init();
-	}
+	constructor() {}
 
-	async init() {
-		await this.initDatabase();
+	async listSearches() {
+		const conn = await db.getConnection();
+		const [data, cols] = await conn.query('select * from rightmove.search');
+		await conn.end();
+		return data;
 	}
 
 	async initDatabase() {
 		console.log('Initialising the database...');
 
 	    const conn = await db.getConnection();
-	    await conn.query('create database if not exists rightmove;');
-	    await conn.query(`
-	        create table if not exists rightmove.property (
-	            id bigint not null,
-	            type varchar(255),
-	            price decimal(10, 2) not null,
-	            lat double,
-	            lng double,
-	            bedroom_count int,
-	            bathroom_count int,
-	            agent_name varchar(255),
-	            agent_tel varchar(255),
-	            address text,
-	            summary text,
-	            last_updated datetime null,
-	            created datetime default current_timestamp,
-	            primary key(id)
-	        );
-	    `);
+	    
+	    await this.createRightmoveDatabase(conn);
+	    await this.createSearchTable(conn);
+	    await this.createPropertyTable(conn);
 
-	    await conn.end()
+	    await conn.end();
+	}
+
+	async createRightmoveDatabase(conn) {
+		await conn.query('create database if not exists rightmove;');
+	}
+
+	async createPropertyTable(conn) {
+		await conn.query(`
+		    create table if not exists rightmove.property (
+		        id bigint not null,
+		        search_id int,
+		        type varchar(255),
+		        added datetime null,
+		        price decimal(10, 2) not null,
+		        address text,
+		        summary text,
+		        bedroom_count int,
+		        bathroom_count int,
+		        lat double,
+		        lng double,
+		        agent_name varchar(255),
+		        agent_tel varchar(255),
+		        primary key(id)
+		    );
+		`);
+	}
+
+	async createSearchTable(conn) {
+		// This should have a foreign key, but both tables reference each other and I cba to figure it out/improve the design
+		await conn.query(`
+			create table if not exists rightmove.search (
+				id int not null auto_increment,
+				most_recent_property_id bigint null,
+				label text,
+				url text,
+				primary key(id)
+			);
+		`)
 	}
 
 	async deleteExisting() {
-		console.log('Deleting the existing rightmove.property table.');
+		console.log('Deleting the existing rightmove.* tables...');
 		const conn = await db.getConnection();
-		try {
-			await conn.query('drop table rightmove.property');
-		} catch(err) {
-			console.log('rightmove.property does not exist so nothing to delete.');
-		}
+
+		await this.tryDropTable(conn, 'rightmove.property');
+		await this.tryDropTable(conn, 'rightmove.search');
 		
 		await conn.end();
 	}
 
-	async save(property) {
+	async tryDropTable(conn, name) {
+		try {
+			await conn.query(`drop table ${name}`)
+		} catch(err) {
+			console.log(`Failed to drop table: ${name}`);
+		}
+	}
+
+	async save(searchId, property) {
 		const conn = await db.getConnection();
 
 		await conn.query('insert ignore into rightmove.property set ?', {
 			id: property.id,
+			search_id: searchId,
 			type: property.propertySubType,
 			lat: property.location.latitude,
 			lng: property.location.longitude,
@@ -68,10 +101,21 @@ class PropertyService {
 			price: property.price.amount,
 			address: property.displayAddress,
 			summary: property.summary,
-			last_updated: property.listingUpdate.listingUpdateDate
+			added: property.listingUpdate.listingUpdateDate
 		})
 
 		await conn.end();
+	}
+
+	async saveSearch(search) {
+		const conn = await db.getConnection();
+
+		await conn.query('insert into rightmove.search set ?', {
+			label: search.label,
+			url: search.url
+		});
+
+		conn.end();
 	}
 
 	log(property) {

@@ -10,7 +10,7 @@ const PropertyService = require('./property-service');
 const utils = require('./utils');
 
 class RightmoveResultsParser {
-    constructor({ mode, startingUrl, maxDepth }) {
+    constructor({ mode, startingUrl, maxDepth, searchId }) {
     	console.log('----------------------------')
     	console.log('Configuration');
     	console.log('----------------------------')
@@ -26,13 +26,10 @@ class RightmoveResultsParser {
         this.maxDepth = maxDepth;
         this.currentDepth = 0;
         this.mode = mode;
+        this.searchId = searchId;
     }
 
     async init() {
-    	if(this.mode === 'full') {
-    		await this.propertyService.deleteExisting();
-    	}
-
         console.log('Launching headless browser...');
         this.browser = await puppeteer.launch();
         this.page = await this.browser.newPage();
@@ -62,7 +59,7 @@ class RightmoveResultsParser {
         for(const property of properties) {
         	console.log(property);
         	this.propertyService.log(property);
-        	await this.propertyService.save(property);
+        	await this.propertyService.save(this.searchId, property);
         }
 
         this.currentDepth = pageMeta.currentPage;
