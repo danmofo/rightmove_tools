@@ -1,0 +1,15 @@
+# Rightmove
+
+This project scrapes the data from rightmove.com and puts it into a database table named `rightmove.property`.
+
+It was made purely because rightmove does not support alerts for searches which contain a custom map region, so I wrote it myself.
+
+## Usage
+
+1. Edit `index.js` to contain your search result URL.
+2. Run `node index --full` to seed the table with ALL data from the search results, this may take a while.
+3. Run `node index --poll`, this will periodically poll the latest page of search results and update the table.
+
+## TODO
+- Send an email alert when a new property is added.
+
