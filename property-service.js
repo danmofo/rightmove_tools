@@ -49,7 +49,7 @@ class PropertyService {
 		        lng double,
 		        agent_name varchar(255),
 		        agent_tel varchar(255),
-		        primary key(id)
+		        primary key(id, search_id)
 		    );
 		`);
 	}
