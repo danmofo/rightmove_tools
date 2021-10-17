@@ -17,6 +17,7 @@ const process  = require('process');
 const PropertyService = require('./property-service');
 const RightmoveResultsParser = require('./rightmove-results-parser');
 const EmailService = require('./email-service');
+const config = require('./config');
 
 (async () => {
 
@@ -42,7 +43,7 @@ const EmailService = require('./email-service');
         if(mode === 'poll') {
             setInterval(async () => {
                 await fetchResultsForSearch(search);
-            }, 10000);
+            }, config.POLL_INTERVAL_SECONDS * 1000);
         }
     }
 
@@ -53,11 +54,7 @@ const EmailService = require('./email-service');
             maxDepth: maxDepth,
             mode: mode,
             onNewPropertyAdded: newProperty => {
-                if(mode !== 'full') {
-                    EmailService.sendAlertEmail(newProperty);
-                } else {
-                    console.log('Not sending alert email on full mode.');
-                }
+                EmailService.sendAlertEmail(newProperty);
             }
         }).init();
     }

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Seed the database with initial data
+node index --full
+
+# Poll for new properties.
+node index --poll
