@@ -46,20 +46,34 @@ class RightmoveResultsParser {
     async setMaxPropertyIdForSearch(property) {
         console.log(`setMaxPropertyIdForSearch(${property.id})`);
         const currentMaxId = await this.propertyService.getCurrentMaxIdForSearch(this.searchId);
-        const currentMaxProperty = await this.propertyService.findById(currentMaxId);
-        
-        console.log(`Current max ID: ${currentMaxId}. Date: ${currentMaxProperty.added}`)
 
-        const propertyDate = this.getPropertyAddedDate(property.listingUpdate.listingUpdateDate);
-        console.log(`New property ID: ${property.id}. Date: ${propertyDate}`);
+        console.log(!!currentMaxId)
 
-        if(propertyDate <= currentMaxProperty.added) {
-            console.log('Not changing max ID for this one.');
-            return;
+        const hasExistingMaxId = !!currentMaxId;
+
+        if(hasExistingMaxId) {
+            const currentMaxProperty = await this.propertyService.findById(currentMaxId);
+            
+            console.log(`Current max ID: ${currentMaxId}. Date: ${currentMaxProperty.added}`)
+
+            const propertyDate = this.getPropertyAddedDate(property.listingUpdate.listingUpdateDate);
+            console.log(`New property ID: ${property.id}. Date: ${propertyDate}`);
+
+            if(propertyDate <= currentMaxProperty.added) {
+                console.log('Not changing max ID for this one.');
+                return;
+            }
+        }
+
+        await this.propertyService.setMaxIdForSearch(this.searchId, property.id);
+
+        // Prevent property alerts being sent the first time the table is seeded.
+        if(hasExistingMaxId) {
+            await this.onNewPropertyAdded(property);    
+        } else {
+            console.log('Table has no most_recent_property_id, not sending alert.');
         }
         
-        await this.propertyService.setMaxIdForSearch(this.searchId, property.id);
-        await this.onNewPropertyAdded(property);
     }
 
     async savePropertiesFromCurrentPage() {
