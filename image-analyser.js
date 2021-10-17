@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * This will analyse images from a Rightmove property listing.
  *
