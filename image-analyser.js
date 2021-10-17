@@ -5,6 +5,7 @@
  */
 
 const gm = require('gm').subClass({imageMagick: true});
+const imageToAscii = require('image-to-ascii');
 
 const images = [
     './images/47229_101023000793_IMG_00_0000.jpeg',
@@ -17,7 +18,19 @@ const images = [
 images.forEach(image => {
     gm(image)
         .identify((err, data) => {
-            console.log(`Path: ${image}, Date: ${getDateTakenFromProperties(data.Properties)}`);
+            if(err) {
+                console.log(`Failed to identity image: ${image}`);
+                return;
+            }
+            imageToAscii(image, {
+                size: {
+                    height: '50%'
+                }
+            },(err, converted) => {
+                console.log(err || converted);
+                console.log(`Path: ${image}, Date: ${getDateTakenFromProperties(data.Properties)}`);
+            });
+             
         });
 });
 
