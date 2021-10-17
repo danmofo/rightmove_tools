@@ -35,8 +35,6 @@ images.forEach(image => {
 });
 
 function getDateTakenFromProperties(properties) {
-    if(properties['exif:DateTimeOriginal']) {
-        return properties['exif:DateTimeOriginal'];
-    }
-    return properties['date:create'];
+    return properties['exif:DateTimeOriginal'] ||
+           properties['date:create'];
 }
