@@ -2,21 +2,35 @@
 
 **Disclaimer: I don't write a lot of NodeJS code. This is a poorly written script I wrote by throwing together random crap from Google searches. It is in no way an example of "good" Node/JS code.**
 
-This project scrapes the data from rightmove.com and puts it into a database table named `rightmove.property`.
+This project contains two tools:
+- `rightmove_server`, scrapes the data from a list of specified rightmove.com searches and sends an email notification when new properties appear in the search. Note that this excludes "featured" properties.
+- `image-analyser.js`, downloads images from a specific Rightmove listing and prints information in the console about them. This is useful if you're interested in when the pictures from a listing were taken. Note that not all images contain this metadata, so it will look like the images were taken today even if they're old. I can't do anything about this.
 
-It was made purely because rightmove does not support alerts for searches which contain a custom map region, so I wrote it myself.
+## Motivation
+
+I am looking to move into a new place, but I don't know where I want to live. So I went onto rightmove.com and created a search covering a large
+region of England/Wales. For some reason property alerts do not work on these searches, so I would have to constantly refresh the search during work
+and save the link on my phone when I'm out and hit refresh periodically.
+
+This is crap and annoying, and takes my attention away from whatever I'm working on, so I decided to try and automate it myself.
 
 ## Usage
 
-1. Copy `.env.template` to `.env` and fill in the values.
-2. Edit `config.js` to contain your searches, the main bit is the result URL. To get this, go to rightmove.com and make a search with your filters applied then copy it. It should look like: `https://www.rightmove.co.uk/property-to-rent/find.html?....`
-3. Run `node index --full` to seed the table with ALL data from the search results, this may take a while.
-4. Run `node index --poll`, this will periodically poll the latest page of search results and update the table. If a new result is added, it will send an email to the given address.
+### rightmove_server
 
-You can also run `./rightmove_server` which will perform steps 2 and 3 in one.
+1. Copy `.env.template` to `.env` and fill in the values.
+2. Edit `config.js`:
+	- `SEARCHES`, add your searches to this list - the main bit is the result URL. To get this, go to rightmove.com and make a search with your filters applied then copy it. It should look like: `https://www.rightmove.co.uk/property-to-rent/find.html?....`
+3. Run `./rightmove_server` and wait.
+
+If you don't want to periodically poll and just want all the data in a table, you can run `node index --full`.
+
+### image_analyser.js
+
+1. Run `./image_analyser <rightmove_property_id>`.
 
 ## Limitations
 - If a property gets updated in any way, it will NOT update the existing row. It will only add new rows. I'm not quite sure if updated results get bumped to the first page or not, for example when the price gets reduced.
 
 ## TODO
-- Send an email alert when a new property is added.
+- Allow rightmove property URL instead of ID only.

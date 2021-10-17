@@ -51,9 +51,8 @@ const config = require('./config');
             startingUrl: search.url,
             searchId: search.id,
             maxDepth: maxDepth,
-            mode: mode,
-            onNewPropertyAdded: newProperty => {
-                EmailService.sendAlertEmail(newProperty);
+            onNewPropertyAdded: async newProperty => {
+                await EmailService.sendAlertEmail(newProperty);
             }
         }).init();
     }

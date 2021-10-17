@@ -6,6 +6,7 @@
  */
 
 const db = require('./db');
+const utils = require('./utils');
 
 class PropertyService {
 	constructor() {}
@@ -41,6 +42,7 @@ class PropertyService {
 		        type varchar(255),
 		        added datetime null,
 		        price decimal(10, 2) not null,
+		        images JSON,
 		        address text,
 		        summary text,
 		        bedroom_count int,
@@ -88,9 +90,12 @@ class PropertyService {
 	async save(searchId, property) {
 		const conn = await db.getConnection();
 
+		utils.makeRelativeImageUrlsAbsolute(property.propertyImages.images);
+
 		await conn.query('insert ignore into rightmove.property set ?', {
 			id: property.id,
 			search_id: searchId,
+			images: JSON.stringify(property.propertyImages.images),
 			type: property.propertySubType,
 			lat: property.location.latitude,
 			lng: property.location.longitude,

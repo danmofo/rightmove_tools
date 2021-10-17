@@ -23,6 +23,16 @@ module.exports = {
 			currentPage: currentPage,
 			nextPage: currentPage + 1
 		};
+	},
+
+	getAbsoluteImageUrl(relativeImageUrl) {
+		return `https://media.rightmove.co.uk/${relativeImageUrl}`;
+	},
+
+	makeRelativeImageUrlsAbsolute(propertyImages) {
+		for (let i = propertyImages.length - 1; i >= 0; i--) {
+			propertyImages[i].url = this.getAbsoluteImageUrl(propertyImages[i].url);
+		}
 	}
 
 }
