@@ -115,7 +115,21 @@ class PropertyService {
 			url: search.url
 		});
 
-		conn.end();
+		await conn.end();
+	}
+
+	async getCurrentMaxIdForSearch(searchId) {
+		const conn = await db.getConnection();
+		const [data, cols] = await conn.query('select most_recent_property_id from rightmove.search where id = ?', [searchId]);
+		await conn.end();
+		return data[0].most_recent_property_id;
+	}
+
+	async setMaxIdForSearch(searchId, maxPropertyId) {
+		console.log(`setMaxIdForSearch(${searchId}, ${maxPropertyId})`);
+		const conn = await db.getConnection();
+		await conn.query('update rightmove.search set most_recent_property_id = ? where id = ?', [maxPropertyId, searchId]);
+		await conn.end();
 	}
 
 	log(property) {

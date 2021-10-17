@@ -10,7 +10,7 @@ const PropertyService = require('./property-service');
 const utils = require('./utils');
 
 class RightmoveResultsParser {
-    constructor({ startingUrl, maxDepth, searchId }) {
+    constructor({ startingUrl, maxDepth, searchId, onNewPropertyAdded }) {
     	console.log('----------------------------')
     	console.log('Configuration');
     	console.log('----------------------------')
@@ -25,6 +25,9 @@ class RightmoveResultsParser {
         this.maxDepth = maxDepth;
         this.currentDepth = 0;
         this.searchId = searchId;
+        this.maxPropertyId = null;
+
+        this.onNewPropertyAdded = onNewPropertyAdded;
     }
 
     async init() {
@@ -32,6 +35,19 @@ class RightmoveResultsParser {
         this.browser = await puppeteer.launch();
         this.page = await this.browser.newPage();
         this.savePropertiesFromCurrentPage();
+    }
+
+    async setMaxPropertyIdForSearch(property) {
+        console.log(`setMaxPropertyIdForSearch(${property.id})`);
+        this.maxPropertyId = property.id;
+        const currentMaxId = await this.propertyService.getCurrentMaxIdForSearch(this.searchId);
+        console.log(currentMaxId);
+        if(currentMaxId >= this.maxPropertyId) {
+            console.log('Not changing max ID for this one.');
+            return;
+        }
+        await this.propertyService.setMaxIdForSearch(this.searchId, this.maxPropertyId);
+        await this.onNewPropertyAdded(property);
     }
 
     async savePropertiesFromCurrentPage() {
@@ -54,9 +70,11 @@ class RightmoveResultsParser {
         	return;
         }
 
+        this.setMaxPropertyIdForSearch(properties[0]);
+
         for(const property of properties) {
-        	console.log(property);
-        	this.propertyService.log(property);
+        	// console.log(property);
+        	// this.propertyService.log(property);
         	await this.propertyService.save(this.searchId, property);
         }
 
