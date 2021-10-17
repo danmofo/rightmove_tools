@@ -132,6 +132,13 @@ class PropertyService {
 		await conn.end();
 	}
 
+	async findById(id) {
+		const conn = await db.getConnection();
+		const [data, cols] = await conn.query('select * from rightmove.property where id = ?', [id]);
+		await conn.end();
+		return data[0];
+	}
+
 	log(property) {
 		console.log(`ID: ${property.id}, Amount: £${property.price.amount}, Updated: ${property.listingUpdate.listingUpdateDate}`)
 		console.log(property.displayAddress)

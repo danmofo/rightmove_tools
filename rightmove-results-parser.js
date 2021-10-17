@@ -25,7 +25,6 @@ class RightmoveResultsParser {
         this.maxDepth = maxDepth;
         this.currentDepth = 0;
         this.searchId = searchId;
-        this.maxPropertyId = null;
 
         this.onNewPropertyAdded = onNewPropertyAdded;
     }
@@ -37,16 +36,29 @@ class RightmoveResultsParser {
         this.savePropertiesFromCurrentPage();
     }
 
+    getPropertyAddedDate(propertyAddedDateStr) {
+        const date = Date.parse(propertyAddedDateStr)
+        const out = new Date()
+        out.setTime(date);
+        return out;
+    }
+
     async setMaxPropertyIdForSearch(property) {
         console.log(`setMaxPropertyIdForSearch(${property.id})`);
-        this.maxPropertyId = property.id;
         const currentMaxId = await this.propertyService.getCurrentMaxIdForSearch(this.searchId);
-        console.log(currentMaxId);
-        if(currentMaxId >= this.maxPropertyId) {
+        const currentMaxProperty = await this.propertyService.findById(currentMaxId);
+        
+        console.log(`Current max ID: ${currentMaxId}. Date: ${currentMaxProperty.added}`)
+
+        const propertyDate = this.getPropertyAddedDate(property.listingUpdate.listingUpdateDate);
+        console.log(`New property ID: ${property.id}. Date: ${propertyDate}`);
+
+        if(propertyDate <= currentMaxProperty.added) {
             console.log('Not changing max ID for this one.');
             return;
         }
-        await this.propertyService.setMaxIdForSearch(this.searchId, this.maxPropertyId);
+        
+        await this.propertyService.setMaxIdForSearch(this.searchId, property.id);
         await this.onNewPropertyAdded(property);
     }
 
