@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Seed the database with initial data
-node index --full
+node rightmove-alerter.js --full
 
 # Poll for new properties.
-node index --poll
+node rightmove-alerter.js --poll

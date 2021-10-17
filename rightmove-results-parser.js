@@ -10,27 +10,20 @@ const PropertyService = require('./property-service');
 const utils = require('./utils');
 
 class RightmoveResultsParser {
-    constructor({ startingUrl, maxDepth, searchId, onNewPropertyAdded }) {
-    	console.log('----------------------------')
-    	console.log('Configuration');
-    	console.log('----------------------------')
-    	console.log(`Starting URL: ${startingUrl}`);
-    	console.log(`Max depth: ${maxDepth}`);
-    	console.log('\n')
-    	
+    constructor({ maxDepth, onNewPropertyAdded, search }) {
+        console.log(`Fetching '${search.label}'`);
         this.propertyService = new PropertyService();
-        this.currentUrl = startingUrl;
+        this.currentUrl = search.url;
         this.browser = null;
         this.page = null;
         this.maxDepth = maxDepth;
         this.currentDepth = 0;
-        this.searchId = searchId;
+        this.searchId = search.id;
 
         this.onNewPropertyAdded = onNewPropertyAdded;
     }
 
     async init() {
-        console.log('Launching headless browser...');
         this.browser = await puppeteer.launch();
         this.page = await this.browser.newPage();
         this.savePropertiesFromCurrentPage();
@@ -44,7 +37,6 @@ class RightmoveResultsParser {
     }
 
     async setMostRecentProperty(property) {
-        console.log(`setMostRecentProperty(${property.id})`);
         const currentMaxId = await this.propertyService.getCurrentMaxIdForSearch(this.searchId);
         const hasExistingMaxId = !!currentMaxId;
 
@@ -57,34 +49,34 @@ class RightmoveResultsParser {
             }
         }
 
-        await this.propertyService.setMaxIdForSearch(this.searchId, property.id);
+        await this.propertyService.setMostRecentPropertyIdForSearch(this.searchId, property.id);
 
         // Prevent property alerts being sent the first time the table is seeded.
         if(hasExistingMaxId) {
             const addedProperty = await this.propertyService.findById(property.id);
             await this.onNewPropertyAdded(addedProperty);
         } else {
-            console.log('Table has no most_recent_property_id, not sending alert.');
+            console.log(`This search no most_recent_property_id value, not sending alert.`);
         }
         
     }
 
     async savePropertiesFromCurrentPage() {
         if(this.currentDepth === this.maxDepth) {
-        	console.log(`Reached max depth of ${this.maxDepth}`);
+            console.log(`Complete: Reached max depth of ${this.maxDepth}`);
         	await this.browser.close();
         	return;
         }
 
     	let pageMeta = utils.getPageMeta(this.currentUrl);
-        console.log(`Navigating to page: ${pageMeta.currentPage}`);
+        console.log(`Saving page: ${pageMeta.currentPage}`);
 
         await this.page.goto(this.currentUrl);
 
         const properties = await this.extractPropertiesFromPage();
 
         if(properties.length === 0) {
-        	console.log('No more properties found!');
+        	console.log('Complete: Reached the last search result page.');
         	await this.browser.close();
         	return;
         }

@@ -12,7 +12,7 @@ module.exports = {
 			throw new Error('Incorrect configuration, set ALERT_RECIPIENT and/or SENDGRID_VERIFIED_SENDER_EMAIL and/or SENDGRID_TEMPLATE_ID inside the .env file.')
 		}
 
-		console.log('Sending email alert!');
+		console.log(`Sending email alert to ${recipient}`);
 
 		const message = {
 			to: recipient,

@@ -64,6 +64,7 @@ class PropertyService {
 				most_recent_property_id bigint null,
 				label text,
 				url text,
+				ignore_keywords text,
 				primary key(id)
 			);
 		`)
@@ -117,7 +118,8 @@ class PropertyService {
 
 		await conn.query('insert into rightmove.search set ?', {
 			label: search.label,
-			url: search.url
+			url: search.url,
+			ignore_keywords: search.ignoreKeywords.join(',')
 		});
 
 		await conn.end();
@@ -130,10 +132,9 @@ class PropertyService {
 		return data[0].most_recent_property_id;
 	}
 
-	async setMaxIdForSearch(searchId, maxPropertyId) {
-		console.log(`setMaxIdForSearch(${searchId}, ${maxPropertyId})`);
+	async setMostRecentPropertyIdForSearch(searchId, propertyId) {
 		const conn = await db.getConnection();
-		await conn.query('update rightmove.search set most_recent_property_id = ? where id = ?', [maxPropertyId, searchId]);
+		await conn.query('update rightmove.search set most_recent_property_id = ? where id = ?', [propertyId, searchId]);
 		await conn.end();
 	}
 
