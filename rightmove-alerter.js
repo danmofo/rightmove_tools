@@ -62,13 +62,11 @@ const config = require('./config');
             searchId: search.id,
             maxDepth: maxDepth,
             onNewPropertyAdded: async newProperty => {
+                console.log('Found new property!');
                 let ignoreKeywords = [];
                 if(search.ignore_keywords) {
                     ignoreKeywords = search.ignore_keywords.split(',');
                 }
-
-                console.log(ignoreKeywords);
-                console.log(newProperty.address);
 
                 if(containsBlacklistedTerm(newProperty.address, ignoreKeywords)) {
                     console.log(`Property matched an ignored keyword (one of '${ignoreKeywords.join(',')}'), not sending alert email.`);

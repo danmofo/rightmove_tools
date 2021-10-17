@@ -7,7 +7,7 @@ module.exports = {
 			// Describes what the search is for
 			label: 'Flats within 1-2 hours of Evesham',
 			// Keywords to ignore, these are lowercased and compared against a lowercased version of the address.
-			ignoreKeywords: ['bristol']
+			ignoreKeywords: ['birmingham']
 		}
 	]
 }
