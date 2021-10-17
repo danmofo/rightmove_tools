@@ -8,13 +8,14 @@ It was made purely because rightmove does not support alerts for searches which 
 
 ## Usage
 
-1. Edit `index.js` to contain your search result URL. To get this, go to rightmove.com and make a search with your filters applied then copy it.
+1. Edit `config.js` to contain your searches, the main bit is the result URL. To get this, go to rightmove.com and make a search with your filters applied then copy it. It should look like: `https://www.rightmove.co.uk/property-to-rent/find.html?....`
 2. Run `node index --full` to seed the table with ALL data from the search results, this may take a while.
 3. Run `node index --poll`, this will periodically poll the latest page of search results and update the table. If a new result is added, it will send an email to the given address.
+
+You can also run `./rightmove_server` which will perform steps 2 and 3 in one.
 
 ## Limitations
 - If a property gets updated in any way, it will NOT update the existing row. It will only add new rows. I'm not quite sure if updated results get bumped to the first page or not, for example when the price gets reduced.
 
 ## TODO
 - Send an email alert when a new property is added.
-
