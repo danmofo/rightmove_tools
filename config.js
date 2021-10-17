@@ -1,5 +1,5 @@
 module.exports = {
-	POLL_INTERVAL_SECONDS: 10,
+	POLL_INTERVAL_SECONDS: 60,
 	SEARCHES: [
 		{
 			// Search result page URL
