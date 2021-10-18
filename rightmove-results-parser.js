@@ -2,6 +2,8 @@
  * This crawls through the search results of a rightmove search URL and inserts them into a db table.
  *
  * This is a mega class that does loads of shit, it should really be split up into different bits, but I can't be bothered.
+ *
+ * todo: Rename all the max ID stuff, that was from when I thought the highest ID === the most recent property, it's not.
  */
 
 const puppeteer = require('puppeteer');
@@ -53,7 +55,10 @@ class RightmoveResultsParser {
 
         // Prevent property alerts being sent the first time the table is seeded.
         if(hasExistingMaxId) {
+            // Grab the property from the DB since it's structured nicer than the raw property JSON
             const addedProperty = await this.propertyService.findById(property.id);
+            // todo: This only notifies the caller about the latest added property, so if 30 were added
+            // only the first one would be returned.
             await this.onNewPropertyAdded(addedProperty);
         } else {
             console.log(`This search no most_recent_property_id value, not sending alert.`);

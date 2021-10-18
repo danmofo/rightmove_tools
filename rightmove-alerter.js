@@ -49,8 +49,15 @@ const config = require('./config');
         await fetchResultsForSearch(search);
 
         if(mode === 'poll') {
+            // todo: We should really wait for each iteration of setInterval to complete before starting the next one.
+            // This keeps fetching results even if the previous requests are still ongoing.
             setInterval(async () => {
-                await fetchResultsForSearch(search);
+                try {
+                    await fetchResultsForSearch(search);    
+                } catch(err) {
+                    console.log('Failed to fetch results');
+                    console.log(err);
+                }
             }, config.POLL_INTERVAL_SECONDS * 1000);
         }
     }
