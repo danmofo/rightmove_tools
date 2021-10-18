@@ -39,4 +39,5 @@ If you don't want to periodically poll and just want all the data in a table, yo
 - If a property gets updated in any way, it will NOT update the existing row. It will only add new rows. I'm not quite sure if updated results get bumped to the first page or not, for example when the price gets reduced.
 
 ## TODO
+- There's a bug where if > 1 new property is found, only the latest one triggers an alert. We could fix this by comparing the whole page of results against the database to see which ones are new. This will only become more of a problem as the search is broader.
 - Allow rightmove property URL instead of ID only for `image-analyser`
